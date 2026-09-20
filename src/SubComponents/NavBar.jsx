@@ -25,7 +25,7 @@ export default function NavBar() {
   ];
 
   return (
-    <nav className={`${dark ? 'bg-slate-950 text-slate-900 shadow-sm' : 'bg-white text-white shadow-lg'} sticky top-0 z-50 border-b border-slate-200/10`}>
+    <nav className={`${dark ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-950 text-white shadow-lg'} sticky top-0 z-50 border-b border-slate-200/10`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export default function NavBar() {
               className={`rounded-full p-2.5 text-sm font-medium transition ${dark ? 'bg-slate-200 text-slate-900 hover:bg-slate-300' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
               aria-label="Toggle color mode"
             >
-              {dark ? 'Light' : 'Dark'}
+              {dark ? 'Dark' : 'Light'}
             </button>
           </div>
 

@@ -135,7 +135,7 @@ export default function Event() {
 
   if (loading) {
     return (
-      <main className={`${dark ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-900'} min-h-screen px-4 py-10`}>
+      <main className={`${dark ? 'bg-white text-slate-950' : 'bg-slate-950 text-slate-100'} min-h-screen px-4 py-10`}>
         <div className="mx-auto max-w-7xl">
           <div className="animate-pulse space-y-6">
             <div className="h-48 rounded-[30px] bg-slate-300/20" />
@@ -155,7 +155,7 @@ export default function Event() {
 
   if (error) {
     return (
-      <main className={`${dark ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-900'} min-h-screen px-4 py-12`}>
+      <main className={`${dark ? 'bg-slate-100 text-white' : 'bg-slate-950 text-slate-100'} min-h-screen px-4 py-12`}>
         <div className="mx-auto max-w-xl rounded-[30px] border border-red-200 bg-red-50 p-8 text-center text-red-700 shadow-sm">
           <h2 className="text-2xl font-bold">Something went wrong</h2>
           
@@ -185,7 +185,7 @@ export default function Event() {
   }
 
   return (
-    <main className={`${dark ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-900'} min-h-screen px-4 py-8 sm:px-6 lg:px-8`}>
+    <main className={`${dark ? 'bg-slate-100 text-slate-950' : 'bg-slate-950 text-slate-100'} min-h-screen px-4 py-8 sm:px-6 lg:px-8`}>
       <div className="mx-auto max-w-7xl pb-8">
         <header className="overflow-hidden rounded-[30px] bg-linear-to-r from-slate-900 via-cyan-900 to-blue-700 p-6 shadow-2xl shadow-cyan-900/20 sm:p-8 lg:p-10">
           <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
@@ -217,7 +217,7 @@ export default function Event() {
         </header>
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className={`${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'} rounded-[28px] border p-5 shadow-sm`}>
+          <aside className={`${dark ? 'border-slate-200 bg-slate-100' : 'border-slate-800 bg-slate-900'} rounded-[28px] border p-5 shadow-sm`}>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold">Filters</h2>
               <button
@@ -258,7 +258,7 @@ export default function Event() {
               })}
             </div>
 
-            <div className={`mt-6 rounded-[24] border p-4 ${dark ? 'border-slate-700 bg-slate-800/70' : 'border-slate-200 bg-slate-50'}`}>
+            <div className={`mt-6 rounded-[24] border p-4 ${dark ? 'border-slate-200 bg-slate-50' : 'border-slate-700 bg-slate-800/70'}`}>
               <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Featured</p>
               <h3 className="mt-3 text-lg font-bold text-inherit">
                 {featuredEvent ? featuredEvent.name : 'No featured event'}
@@ -270,7 +270,7 @@ export default function Event() {
           </aside>
 
           <section className="space-y-5">
-            <div className={`${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'} rounded-[28px] border p-4 shadow-sm sm:p-5`}>
+            <div className={`${dark ? 'border-slate-200 bg-slate-100' : 'border-slate-800 bg-slate-900'} rounded-[28px] border p-4 shadow-sm sm:p-5`}>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-[0.24em] text-cyan-500">Explore</p>
@@ -285,7 +285,7 @@ export default function Event() {
                 <label
                   htmlFor="event-search"
                   className={`flex w-full max-w-md items-center gap-3 rounded-2xl border px-4 py-3 ${
-                    dark ? 'border-slate-700 bg-slate-800 text-slate-200' : 'border-slate-200 bg-slate-50 text-slate-600'
+                    dark ? 'border-slate-200 bg-slate-50 text-slate-600' : 'border-slate-700 bg-slate-800 text-slate-200'
                   }`}
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-cyan-500">
@@ -454,7 +454,7 @@ export default function Event() {
                 })}
               </div>
             ) : (
-              <div className={`${dark ? 'border-slate-700 bg-slate-900' : 'border-slate-300 bg-white'} rounded-[28px] border border-dashed p-12 text-center`}>
+              <div className={`${dark ? 'border-slate-300 bg-white' : 'border-slate-700 bg-950'} rounded-[28px] border border-dashed p-12 text-center`}>
                 <p className="text-lg font-semibold">No events match your search.</p>
                 <p className="mt-2 text-sm text-slate-500">Try another keyword or switch to a different category.</p>
               </div>

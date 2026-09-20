@@ -14,7 +14,7 @@ export default function Footer() {
 
   const { dark } = useTheme();
   return (
-    <footer className={`relative overflow-hidden bg-slate-950 text-slate-300 ${dark ? 'bg-slate-950' : 'bg-white'}`}>
+    <footer className={`relative overflow-hidden  text-slate-300 ${dark ? 'bg-slate-100 ' : 'bg-slate-950'}`}>
       <div className='absolute -right-24 -top-28 h-72 w-72 rounded-full bg-indigo-600/20 blur-3xl' aria-hidden='true' />
       <div className='absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl' aria-hidden='true' />
 
@@ -22,7 +22,7 @@ export default function Footer() {
         <div className='grid gap-12 border-b border-white/10 pb-12 lg:grid-cols-[1.4fr_0.7fr_1.1fr] lg:gap-20'>
           <div>
             <p className='mb-4 text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300'>EventHub</p>
-            <h2 className={`max-w-md text-3xl font-bold tracking-tight text-white sm:text-4xl ${dark ? 'text-black' : 'text-white'}`}>
+            <h2 className={`max-w-md text-3xl font-bold tracking-tight  sm:text-4xl ${dark ? 'text-slate-950' : 'text-white'}`}>
               Make room for moments worth remembering.
             </h2>
             <p className='mt-5 max-w-md text-sm leading-6 text-slate-400'>
@@ -31,7 +31,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className='text-sm font-semibold uppercase tracking-[0.18em] text-white'>Navigate</h3>
+            <h3 className={`text-sm font-semibold uppercase tracking-[0.18em]  ${dark ? 'text-slate-500' : 'text-slate-100'}`}>Navigate</h3>
             <nav className='mt-5 flex flex-col items-start gap-3 text-sm' aria-label='Footer navigation'>
               {footerLinks.map((link) => (
                 <NavLink
@@ -46,7 +46,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className='text-sm font-semibold uppercase tracking-[0.18em] text-white'>Stay in the loop</h3>
+            <h3 className={`text-sm font-semibold uppercase tracking-[0.18em]  ${dark ? 'text-slate-500' : 'text-slate-100'}`}>Stay in the loop</h3>
             <p className='mt-5 text-sm leading-6 text-slate-400'>Get a short list of standout events in your inbox.</p>
             <form className='mt-5 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row' onSubmit={(event) => event.preventDefault()}>
               <label className='sr-only' htmlFor='footer-email'>Email address</label>
