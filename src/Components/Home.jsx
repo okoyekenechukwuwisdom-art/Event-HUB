@@ -7,45 +7,82 @@ import eventimg from '../assets/eventimg1.avif';
 
 
 export default function Home() {
-
   const { dark } = useTheme();
+
   return (
-    <>
-    <div className={`${dark ? 'bg-slate-950 text-black' : 'bg-white text-white'} min-h-screen flex flex-row items-center justify-center  -mt-10 md`}>
-      <div className=' text-sm mb-4 tracking-[0.24em] text-cyan-300 rounded-2xl w-200 h-80   mr-4 ml-20 pt-10 pl-10 bg-slate-900' >SMART PLANNING
-        <p className='text-4xl text-slate-300 tracking-widest font-bold mt-4'>Discover events that moves your world forward.</p>
-        <h4 className='text-lg text-slate-400 mt-4'>Join us and make a difference!</h4>
-        <ul className='flex flex-row gap-6 mt-10'>
-          <NavLink to="/registration" className='p-2  bg-cyan-600 text-white rounded-full font-semibold tracking-normal hover:bg-cyan-600 transition cursor-pointer hover:font-semi-bold '>View My Bookings</NavLink>
-          <NavLink to="/events" className='p-2  bg-cyan-700 text-white rounded-full font-bold tracking-normal hover:bg-cyan-300 transition cursor-pointer hover:font-bold '>Explore Events</NavLink>
-        </ul>
-     </div>
-     <div className='text-4xl w-150 h-80 bg-slate-300 rounded-2xl  mr-20 ml-4 mb-4 pt-10 pl-10 box-border '>
+    <section
+      className={`${
+        dark ? 'bg-slate-950 text-slate-50' : 'bg-slate-50 text-slate-900'
+      } min-h-screen px-4 py-10 sm:px-6 lg:px-8`}
+    >
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <div className="grid items-center gap-6 md:grid-cols-2">
+          <div className="rounded-3xl bg-slate-900 p-6 shadow-xl shadow-slate-900/10 sm:p-8 lg:p-10">
+            <span className="inline-block text-xs font-medium tracking-[0.24em] text-cyan-300">
+              SMART PLANNING
+            </span>
+            <h1 className="mt-4 text-3xl font-bold leading-tight tracking-wide text-slate-100 sm:text-4xl lg:text-5xl">
+              Discover events that move your world forward.
+            </h1>
+            <p className="mt-4 text-base text-slate-300 sm:text-lg">
+              Join us and make a difference!
+            </p>
 
-      <div className=' border-b border-[gray]   h-20  w-95 '>
-       <div className='text-sm mb-4 tracking-[0.24em] text-cyan-600'>ACTIVE</div>
-       <p className='flex flex-row gap-4  w-95 h-10 -mt-2'>
-         <span className='text-slate-900 font-bold'>6</span>
-         <button className=''></button>
-       </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <NavLink
+                to="/registration"
+                className="inline-flex items-center justify-center rounded-full bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500"
+              >
+                View My Bookings
+              </NavLink>
+              <NavLink
+                to="/events"
+                className="inline-flex items-center justify-center rounded-full bg-cyan-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-600"
+              >
+                Explore Events
+              </NavLink>
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-slate-200 p-5 shadow-lg shadow-slate-200/50 sm:p-6">
+            <div className="border-b border-slate-300 pb-5">
+              <div className="text-xs font-semibold tracking-[0.24em] text-cyan-700">
+                ACTIVE
+              </div>
+              <div className="mt-3 flex items-center gap-4">
+                <span className="text-4xl font-bold text-slate-900">6</span>
+                <span className="rounded-full bg-cyan-100 px-3 py-1 text-sm font-medium text-cyan-700">
+                  This week
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-2xl  p-4 text-slate-900">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-800">
+                Upcoming
+              </p>
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2">
+                  <span className="font-medium">Tech Meetup</span>
+                  <span className="text-sm text-slate-600">Thu</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2">
+                  <span className="font-medium">Creative Workshop</span>
+                  <span className="text-sm text-slate-600">Fri</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-3xl shadow-xl shadow-slate-300/20">
+          <img
+            src={eventimg}
+            alt="Event banner"
+            className="h-[260] w-full object-cover sm:h-[320] lg:h-[420]"
+          />
+        </div>
       </div>
-
-      <div className='bg-amber-100 h-30 w-95 mt-5'></div>
-
-     </div>
-      
-    </div>
-
-
-    <div className={`${dark ? 'bg-slate-950 text-black' : 'bg-white text-white'} min-h-screen flex flex-row items-center justify-center  -mt-15 md `}>
-      <img
-        src={eventimg} 
-        alt="Event Image"
-        className='h-70 w-275 object-cover -mt-76 rounded-2xl'>
-        </img>
-    </div>
-
-    
-  </>
+    </section>
   );
 }
