@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <section
       className={`${
-        dark ? 'bg-slate-950 text-slate-50' : 'bg-slate-50 text-slate-900'
+        dark ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-50'
       } min-h-screen px-4 py-10 sm:px-6 lg:px-8`}
     >
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
