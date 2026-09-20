@@ -29,7 +29,7 @@ export default function NavBar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-200 hover:scale-105 ${dark ? 'bg-gradient-to-br from-cyan-200 to-cyan-100' : 'bg-gradient-to-br from-cyan-400 to-cyan-500'}`}>
+            <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-200 hover:scale-105 ${dark ? 'bg-linear-to-br from-cyan-200 to-cyan-100' : 'bg-linear-to-br from-cyan-400 to-cyan-500'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-7 w-7" aria-label="EventHub logo">
                 <defs>
                   <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
