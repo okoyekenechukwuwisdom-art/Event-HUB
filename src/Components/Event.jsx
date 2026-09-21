@@ -87,16 +87,90 @@ export default function Event() {
     };
   }, []);
 
-  useEffect(() =>{
-    const createEvents = async () => {
-        try {
-          const response = await fetch('https://event-hub-olive-six.vercel.app/api/v1/events/');
-        } catch (error) {
-          
-        }
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isSubmitting,setIsSubmitting] = useState(false);
+  const [formData,setFormData] = useState({
+    name: '',
+    date: '',
+    category: '',
+    location: '',
+    description: '',
+    organizer: '',
+    event_time: '',
+    imageUrl: '',
+    capacity: '',
+    registered: '',
+    price: '',
+    status: '',
+  });
+
+  
+  const API_URL = 'https://event-hub-olive-six.vercel.app/api/v1/events/';
+
+  const getEvents = async () => {
+    try{
+      setLoading(true);
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error('Failed to fetch events')
+        const data = await response.json();
+
+      setEvents(data);
+    }catch (err) {
+      setError(err.message);
+    }finally{
+      setLoading(false)
     }
-    createEvents();
-  })
+  };
+
+  useEffect(() => {
+    getEvents();
+  },[]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value});
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(API_URL,{
+        method:'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok)throw new error('Failed to create event');
+
+      const newEvent = await response.json();
+
+      setEvents((prevEvents) => [newEvent, ...prevEvents]);
+
+      setFormData({
+    name: '',
+    date: '',
+    category: '',
+    location: '',
+    description: '',
+    organizer: '',
+    event_time: '',
+    imageUrl: '',
+    capacity: '',
+    registered: '',
+    price: '',
+    status: '',
+      });
+      setIsModalOpen(false);
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }finally{
+      setIsSubmitting(false);
+    }
+  };
 
   const categories = useMemo(
     () => ['All', ...new Set(events.map((event) => event.category).filter(Boolean))],
@@ -162,26 +236,6 @@ export default function Event() {
         </div>
       </main>
     );
-  }
-  function FavoriteButton ({initialisFavorite,productId}) {
-    const [isFavorite,setIsFavorite] = useState(initialisFavorite);
-    const [isLoading,setIsLoading] = useState(false);
-
-    const handleClick = async() => {
-       setIsLoading(true);
-
-       const nextFavoritedState = !isFavorite;
-
-       try {
-        await fetch(`https://event-hub-olive-six.vercel.app/api/v1/events/${productId}/favorite`,{
-         method: nextFavoritedState ? 'POST' : 'DELETE', 
-        });
-       } catch (error) {
-        console.error('failed to update favorite status', error);
-      }finally{
-        setIsLoading(false);
-      }
-    }
   }
 
   return (
@@ -278,10 +332,205 @@ export default function Event() {
                     {selectedCategory === 'All' ? 'All upcoming events' : selectedCategory}
                   </h2>
                 </div>
-                <button 
-                
-                className='rounded-2xl bg-cyan-300 h-10 pl-2 mt-0.5 pr-2 justify-center items-center flex font-bold cursor-pointer'>CREATE EVENT
+                <button
+                 onClick={() => setIsModalOpen(true)} 
+                 className='px-1 py-3 bg-cyan-400 text-white font-medium text-sm rounded-2xl hover:bg-cyan-500 transition flex items-center gap-2 cursor-pointer'
+                >
+                  <span className='text-lg leading-none'>+</span>Create New Event
                 </button>
+
+                {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 relative overflow-y-auto animate-in fade-in zoom-in-95 duration-150 max-h-[90vh]">
+            
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Create New Event</h2>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Event Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Tech Summit 2026"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Date</label>
+                  <input
+                    type="date"
+                    name="date"
+                    required
+                    value={formData.date}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Category</label>
+                  <input
+                    type="text"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    placeholder="Tech, Music, etc."
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  />
+                </div>
+              </div>
+              
+             <div className='grid grid-cols-2 gap-3'>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="San Francisco, CA or Online"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+      
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Event Time</label>
+                <input
+                  type="time"
+                  name="event_time"
+                  value={formData.event_time}
+                  onChange={handleChange}
+                  placeholder="02-11-2027"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+           </div>
+
+           <div className='grid grid-cols-2 gap-3'>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Registered</label>
+                <input
+                  type="text"
+                  name="registered"
+                  value={formData.registered}
+                  onChange={handleChange}
+                  placeholder="3429"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                />
+              </div>
+      
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Status</label>
+                <input
+                  type="text"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  placeholder="upcoming"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+           </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Image URL</label>
+                <input
+                  type="url"
+                  name="imageUrl"
+                  value={formData.imageUrl}
+                  onChange={handleChange}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Organizer</label>
+                <input
+                  type="text"
+                  name="organizer"
+                  value={formData.organizer}
+                  onChange={handleChange}
+                  placeholder="San Francisco, CA or Online"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+               
+            <div className='grid grid-cols-2 gap-3'>
+              <div>
+                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Price</label>
+                  <input
+                    type="text"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    placeholder="$1200"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  />
+                </div>
+  
+              <div>
+                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Capacity</label>
+                  <input
+                    type="text"
+                    name="Capacity"
+                    value={formData.capacity}
+                    onChange={handleChange}
+                    placeholder="5000"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                  />
+                </div>
+
+           </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-900 uppercase mb-1">Description</label>
+                <textarea
+                  name="description"
+                  rows="3"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Event details..."
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                ></textarea>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 border border-gray-200 text-slate-950 rounded-lg text-sm font-medium hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-cyan-500 text-white rounded-lg text-sm font-medium hover:bg-cyan-500 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmitting ? 'Publishing...' : 'Publish Event'}
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
                 <label
                   htmlFor="event-search"
                   className={`flex w-full max-w-md items-center gap-3 rounded-2xl border px-4 py-3 ${
