@@ -93,16 +93,16 @@ export default function Event() {
   const [formData,setFormData] = useState({
     name: '',
     date: '',
-    category: '',
+    category: 'Technology',
     location: '',
     description: '',
     organizer: '',
-    event_time: '',
-    imageUrl: '',
-    capacity: '',
-    registered: '',
-    price: '',
-    status: '',
+    event_time: '06:00:25.796Z',
+    images: [''],
+    capacity: 100,
+    registered: 0,
+    price: 0,
+    status: 'upcoming',
   });
 
   
@@ -139,7 +139,7 @@ export default function Event() {
       const response = await fetch(API_URL,{
         method:'POST',
         headers: {
-          'content-type': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
@@ -153,16 +153,16 @@ export default function Event() {
       setFormData({
     name: '',
     date: '',
-    category: '',
+    category: 'Technology',
     location: '',
     description: '',
     organizer: '',
-    event_time: '',
-    imageUrl: '',
-    capacity: '',
-    registered: '',
-    price: '',
-    status: '',
+    event_time: '06:00:25.796Z',
+    images: [''],
+    capacity: 100,
+    registered: 0,
+    price: 0,
+    status:'upcoming',
       });
       setIsModalOpen(false);
     } catch (err) {
@@ -190,6 +190,13 @@ export default function Event() {
         event.organizer,
         event.description,
         event.category,
+        event.organizer,
+        event.event_time,
+        event.price,
+        event.images,
+        event.status,
+        event.registered,
+        event.capacity
       ]
         .filter(Boolean)
         .join(' ')
@@ -357,7 +364,7 @@ export default function Event() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Event Name</label>
+                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Event Name</label>
                 <input
                   type="text"
                   name="name"
@@ -365,134 +372,134 @@ export default function Event() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Tech Summit 2026"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Date</label>
+                  <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Date</label>
                   <input
                     type="date"
                     name="date"
                     required
                     value={formData.date}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Category</label>
+                  <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Category</label>
                   <input
                     type="text"
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
                     placeholder="Tech, Music, etc."
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
               </div>
               
              <div className='grid grid-cols-2 gap-3'>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Location</label>
+                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Location</label>
                 <input
                   type="text"
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="San Francisco, CA or Online"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
       
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Event Time</label>
+                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Event Time</label>
                 <input
                   type="time"
                   name="event_time"
                   value={formData.event_time}
                   onChange={handleChange}
                   placeholder="02-11-2027"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
            </div>
 
            <div className='grid grid-cols-2 gap-3'>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Registered</label>
+                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Registered</label>
                 <input
                   type="text"
                   name="registered"
                   value={formData.registered}
                   onChange={handleChange}
                   placeholder="3429"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
       
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Status</label>
+                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Status</label>
                 <input
                   type="text"
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
                   placeholder="upcoming"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
            </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Image URL</label>
+                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Images</label>
                 <input
                   type="url"
-                  name="imageUrl"
-                  value={formData.imageUrl}
+                  name="images"
+                  value={formData.images}
                   onChange={handleChange}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Organizer</label>
+                <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Organizer</label>
                 <input
                   type="text"
                   name="organizer"
                   value={formData.organizer}
                   onChange={handleChange}
                   placeholder="San Francisco, CA or Online"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
                
             <div className='grid grid-cols-2 gap-3'>
               <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Price</label>
+                  <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Price</label>
                   <input
                     type="text"
                     name="price"
                     value={formData.price}
                     onChange={handleChange}
                     placeholder="$1200"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
   
               <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Capacity</label>
+                  <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Capacity</label>
                   <input
                     type="text"
                     name="Capacity"
                     value={formData.capacity}
                     onChange={handleChange}
                     placeholder="5000"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
 
@@ -505,7 +512,7 @@ export default function Event() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Event details..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 ></textarea>
               </div>
 
