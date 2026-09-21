@@ -97,8 +97,8 @@ export default function Event() {
     location: '',
     description: '',
     organizer: '',
-    event_time: '06:00:25.796Z',
-    images: [''],
+    event_time: '18:00',
+    files: [],
     capacity: 100,
     registered: 0,
     price: 0,
@@ -128,7 +128,19 @@ export default function Event() {
   },[]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value});
+    const { name, value, files } = e.target;
+
+    if (name === 'files') {
+      setFormData((prev) => ({ ...prev, files: Array.from(files || []) }));
+      return;
+    }
+
+    if (['capacity', 'registered', 'price'].includes(name)) {
+      setFormData((prev) => ({ ...prev, [name]: Number(value) || 0 }));
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -136,38 +148,86 @@ export default function Event() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(API_URL,{
-        method:'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      const normalizedCategory = ['Technology', 'Community', 'Music', 'Workshop', 'Business', 'Other'].includes(formData.category)
+        ? formData.category
+        : 'Other';
+
+      const normalizedStatus = ['upcoming', 'ongoing', 'completed'].includes(formData.status)
+        ? formData.status
+        : 'upcoming';
+
+      const requiredFields = {
+        name: String(formData.name || '').trim(),
+        description: String(formData.description || '').trim(),
+        category: normalizedCategory,
+        date: String(formData.date || '').trim(),
+        event_time: String(formData.event_time || '').trim(),
+        location: String(formData.location || '').trim(),
+        organizer: String(formData.organizer || '').trim(),
+        price: String(Number(formData.price) || 0),
+        capacity: String(Number(formData.capacity) || 0),
+        status: normalizedStatus,
+      };
+
+      const missingRequired = Object.entries(requiredFields)
+        .filter(([_, value]) => !String(value).trim())
+        .map(([key]) => key);
+
+      if (missingRequired.length > 0) {
+        alert(`Please complete the required fields: ${missingRequired.join(', ')}`);
+        return;
+      }
+
+      const form = new FormData();
+      form.append('name', requiredFields.name);
+      form.append('description', requiredFields.description);
+      form.append('category', requiredFields.category);
+      form.append('date', requiredFields.date);
+      form.append('event_time', requiredFields.event_time);
+      form.append('location', requiredFields.location);
+      form.append('organizer', requiredFields.organizer);
+      form.append('price', requiredFields.price);
+      form.append('capacity', requiredFields.capacity);
+      form.append('status', requiredFields.status);
+
+      if (formData.files && formData.files.length > 0) {
+        formData.files.forEach((file) => {
+          form.append('files', file);
+        });
+      }
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        body: form,
       });
 
-      if (!response.ok)throw new error('Failed to create event');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail ? JSON.stringify(errorData.detail) : 'Failed to create event');
+      }
 
       const newEvent = await response.json();
 
       setEvents((prevEvents) => [newEvent, ...prevEvents]);
 
       setFormData({
-    name: '',
-    date: '',
-    category: 'Technology',
-    location: '',
-    description: '',
-    organizer: '',
-    event_time: '06:00:25.796Z',
-    images: [''],
-    capacity: 100,
-    registered: 0,
-    price: 0,
-    status:'upcoming',
+        name: '',
+        date: '',
+        category: 'Technology',
+        location: '',
+        description: '',
+        organizer: '',
+        event_time: '18:00',
+        files: [],
+        capacity: 100,
+        registered: 0,
+        price: 0,
+        status: 'upcoming',
       });
       setIsModalOpen(false);
     } catch (err) {
       alert(`Error: ${err.message}`);
-    }finally{
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -350,7 +410,6 @@ export default function Event() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 relative overflow-y-auto animate-in fade-in zoom-in-95 duration-150 max-h-[90vh]">
             
-            {/* Modal Header */}
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900">Create New Event</h2>
               <button 
@@ -361,7 +420,6 @@ export default function Event() {
               </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Event Name</label>
@@ -372,7 +430,7 @@ export default function Event() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Tech Summit 2026"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                  className=" text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
 
@@ -385,20 +443,25 @@ export default function Event() {
                     required
                     value={formData.date}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                    className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Category</label>
-                  <input
-                    type="text"
+                  <select
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    placeholder="Tech, Music, etc."
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
-                  />
+                    className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                  >
+                    <option value="Technology">Technology</option>
+                    <option value="Community">Community</option>
+                    <option value="Music">Music</option>
+                    <option value="Workshop">Workshop</option>
+                    <option value="Business">Business</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
               </div>
               
@@ -411,7 +474,7 @@ export default function Event() {
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="San Francisco, CA or Online"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                  className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
       
@@ -423,7 +486,7 @@ export default function Event() {
                   value={formData.event_time}
                   onChange={handleChange}
                   placeholder="02-11-2027"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                  className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
            </div>
@@ -432,38 +495,45 @@ export default function Event() {
               <div>
                 <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Registered</label>
                 <input
-                  type="text"
+                  type="number"
                   name="registered"
                   value={formData.registered}
                   onChange={handleChange}
                   placeholder="3429"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                  className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
       
               <div>
                 <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Status</label>
-                <input
-                  type="text"
+                <select
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  placeholder="upcoming"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
-                />
+                  className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                >
+                  <option value="upcoming">upcoming</option>
+                  <option value="ongoing">ongoing</option>
+                  <option value="completed">completed</option>
+                </select>
               </div>
            </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Images</label>
                 <input
-                  type="url"
-                  name="images"
-                  value={formData.images}
+                  type="file"
+                  name="files"
+                  accept="image/*"
+                  multiple
                   onChange={handleChange}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                  className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
+                {formData.files.length > 0 && (
+                  <p className="mt-2 text-xs text-slate-500">
+                    {formData.files.length} file(s) selected
+                  </p>
+                )}
               </div>
 
               <div>
@@ -473,8 +543,8 @@ export default function Event() {
                   name="organizer"
                   value={formData.organizer}
                   onChange={handleChange}
-                  placeholder="San Francisco, CA or Online"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                  placeholder="Kene Entertainment company and industry"
+                  className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
                
@@ -482,24 +552,24 @@ export default function Event() {
               <div>
                   <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Price</label>
                   <input
-                    type="text"
+                    type="number"
                     name="price"
                     value={formData.price}
                     onChange={handleChange}
-                    placeholder="$1200"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                    placeholder="1200"
+                    className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
   
               <div>
                   <label className="block text-xs font-semibold text-slate-950 uppercase mb-1">Capacity</label>
                   <input
-                    type="text"
-                    name="Capacity"
+                    type="number"
+                    name="capacity"
                     value={formData.capacity}
                     onChange={handleChange}
                     placeholder="5000"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                    className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
 
@@ -512,11 +582,10 @@ export default function Event() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Event details..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                  className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 ></textarea>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -561,7 +630,7 @@ export default function Event() {
             </div>
 
             {featuredEvent && selectedCategory === 'All' && !searchTerm && (
-              <div className={`${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'} overflow-hidden rounded-[28px] border shadow-sm`}>
+              <div className={`${dark ? 'border-slate-200 bg-slate-white' : 'border-slate-800 bg-slate-900'} overflow-hidden rounded-[28px] border shadow-sm`}>
                 <div className="grid gap-0 md:grid-cols-[1.1fr_0.9fr]">
                   <div className="relative min-h-[250]">
                     <img
@@ -580,8 +649,8 @@ export default function Event() {
 
                   <div className="p-5 sm:p-6">
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-500">Featured event</p>
-                    <h3 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">{featuredEvent.name}</h3>
-                    <p className="mt-3 text-sm text-slate-500 dark:text-slate-300">
+                    <h3 className="text-slate-400 mt-3 text-2xl font-black tracking-tight sm:text-3xl">{featuredEvent.name}</h3>
+                    <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
                       {featuredEvent.description || 'A curated event for professionals, creators, and curious minds.'}
                     </p>
 
@@ -632,7 +701,7 @@ export default function Event() {
                   return (
                     <article
                       key={event.uid || event.name}
-                      className={`${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'} overflow-hidden rounded-[28px] border shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl`}
+                      className={`${dark ? 'border-slate-200 bg-white' : 'border-slate-800 bg-slate-900'} overflow-hidden rounded-[28px] border shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl`}
                     >
                       <div className="relative h-52 overflow-hidden">
                       

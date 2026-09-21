@@ -116,7 +116,7 @@ export default function EventDetails() {
   const seatsLeft = Math.max((event.capacity ?? 0) - (event.registered ?? 0), 0);
 
   return (
-    <main className={`${dark ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-900'} min-h-screen px-4 py-8 sm:px-6 lg:px-8`}>
+    <main className={`${dark ? 'bg-slate-100 text-slate-900' : 'bg-slate-950 text-white'} min-h-screen px-4 py-8 sm:px-6 lg:px-8`}>
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center gap-2 text-sm text-cyan-600">
           <Link to="/events" className="font-medium hover:underline">Events</Link>
@@ -124,7 +124,7 @@ export default function EventDetails() {
           <span className="text-slate-500 dark:text-slate-400">{event.name}</span>
         </div>
 
-        <div className={`overflow-hidden rounded-[32] border shadow-sm ${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
+        <div className={`overflow-hidden rounded-[32] border shadow-sm ${dark ? 'border-slate-200 bg-white' : 'border-slate-800 bg-slate-900'}`}>
           <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="relative min-h-[300]">
               <img
@@ -185,15 +185,15 @@ export default function EventDetails() {
         </div>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
-          <div className={`rounded-[28px] border p-6 ${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
+          <div className={`rounded-[28px] border p-6 ${dark ? 'border-slate-200 bg-white' : 'border-slate-800 bg-slate-900'}`}>
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Organizer</p>
             <h3 className="mt-3 text-xl font-bold">{event.organizer || 'EventHub Team'}</h3>
           </div>
-          <div className={`rounded-[28px] border p-6 ${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
+          <div className={`rounded-[28px] border p-6 ${dark ? 'border-slate-200 bg-white' : 'border-slate-800 bg-slate-900'}`}>
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Capacity</p>
             <h3 className="mt-3 text-xl font-bold">{event.capacity ?? 0}</h3>
           </div>
-          <div className={`rounded-[28px] border p-6 ${dark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
+          <div className={`rounded-[28px] border p-6 ${dark ? 'border-slate-200 bg-white' : 'border-slate-800 bg-slate-900'}`}>
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Seats left</p>
             <h3 className="mt-3 text-xl font-bold">{seatsLeft}</h3>
           </div>
