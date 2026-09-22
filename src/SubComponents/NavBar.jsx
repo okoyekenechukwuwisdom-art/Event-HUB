@@ -129,7 +129,7 @@ export default function NavBar() {
 
             <div className="flex items-center gap-3 pt-2">
               <NavLink
-                to='/register/'
+                to="/registration"
                 onClick={() => setIsMenuOpen(false)}
                 className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-semibold ${dark ? 'bg-cyan-500 text-white' : 'bg-cyan-400 text-slate-950'}`}
               >
