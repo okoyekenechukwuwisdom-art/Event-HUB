@@ -88,6 +88,7 @@ export default function Event() {
   }, []);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEventId, setEditingEventId] = useState(null);
 
   const [isSubmitting,setIsSubmitting] = useState(false);
   const [formData,setFormData] = useState({
@@ -107,6 +108,45 @@ export default function Event() {
 
   
   const API_URL = 'https://event-hub-olive-six.vercel.app/api/v1/events/';
+
+  const updateEventById = async (eventId, updates = {}, files = []) => {
+    if (!eventId) {
+      throw new Error('Event ID is required to update the event.');
+    }
+
+    const form = new FormData();
+
+    Object.entries(updates || {}).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') {
+        return;
+      }
+
+      if (key === 'price' || key === 'capacity') {
+        form.append(key, String(Number(value)));
+        return;
+      }
+
+      form.append(key, String(value));
+    });
+
+    if (files && files.length > 0) {
+      files.forEach((file) => {
+        form.append('files', file);
+      });
+    }
+
+    const response = await fetch(`${API_URL}${eventId}`, {
+      method: 'PATCH',
+      body: form,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail ? JSON.stringify(errorData.detail) : 'Failed to update event');
+    }
+
+    return response.json();
+  };
 
   const getEvents = async () => {
     try{
@@ -141,6 +181,23 @@ export default function Event() {
     }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      date: '',
+      category: 'Technology',
+      location: '',
+      description: '',
+      organizer: '',
+      event_time: '18:00',
+      files: [],
+      capacity: 100,
+      registered: 0,
+      price: 0,
+      status: 'upcoming',
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -196,40 +253,79 @@ export default function Event() {
         });
       }
 
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        body: form,
-      });
+      let updatedEvent;
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.detail ? JSON.stringify(errorData.detail) : 'Failed to create event');
+      if (editingEventId) {
+        updatedEvent = await updateEventById(editingEventId, {
+          name: requiredFields.name,
+          description: requiredFields.description,
+          category: requiredFields.category,
+          date: requiredFields.date,
+          event_time: requiredFields.event_time,
+          location: requiredFields.location,
+          organizer: requiredFields.organizer,
+          price: Number(requiredFields.price),
+          capacity: Number(requiredFields.capacity),
+          status: requiredFields.status,
+        }, formData.files);
+      } else {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: form,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.detail ? JSON.stringify(errorData.detail) : 'Failed to create event');
+        }
+
+        updatedEvent = await response.json();
       }
 
-      const newEvent = await response.json();
+      setEvents((prevEvents) => {
+        if (editingEventId) {
+          return prevEvents.map((event) => (event.uid === editingEventId ? { ...event, ...updatedEvent } : event));
+        }
 
-      setEvents((prevEvents) => [newEvent, ...prevEvents]);
-
-      setFormData({
-        name: '',
-        date: '',
-        category: 'Technology',
-        location: '',
-        description: '',
-        organizer: '',
-        event_time: '18:00',
-        files: [],
-        capacity: 100,
-        registered: 0,
-        price: 0,
-        status: 'upcoming',
+        return [updatedEvent, ...prevEvents];
       });
+
+      await getEvents();
+      resetForm();
+      setEditingEventId(null);
       setIsModalOpen(false);
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const openCreateModal = () => {
+    resetForm();
+    setEditingEventId(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (event) => {
+    setEditingEventId(event.uid);
+    setFormData({
+      name: event.name || '',
+      date: event.date || '',
+      category: event.category || 'Technology',
+      location: event.location || '',
+      description: event.description || '',
+      organizer: event.organizer || '',
+      event_time: typeof event.event_time === 'string' && event.event_time.length >= 5
+        ? event.event_time.slice(0, 5)
+        : '18:00',
+      files: [],
+      capacity: Number(event.capacity ?? 100),
+      registered: Number(event.registered ?? 0),
+      price: Number(event.price ?? 0),
+      status: event.status || 'upcoming',
+    });
+    setIsModalOpen(true);
   };
 
   const categories = useMemo(
@@ -400,7 +496,7 @@ export default function Event() {
                   </h2>
                 </div>
                 <button
-                 onClick={() => setIsModalOpen(true)} 
+                 onClick={openCreateModal} 
                  className='px-1 py-3 bg-cyan-400 text-white font-medium text-sm rounded-2xl hover:bg-cyan-500 transition flex items-center gap-2 cursor-pointer'
                 >
                   <span className='text-lg leading-none'>+</span>Create New Event
@@ -411,9 +507,13 @@ export default function Event() {
           <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 relative overflow-y-auto animate-in fade-in zoom-in-95 duration-150 max-h-[90vh]">
             
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Create New Event</h2>
+              <h2 className="text-xl font-bold text-gray-900">{editingEventId ? 'Edit Event' : 'Create New Event'}</h2>
               <button 
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setEditingEventId(null);
+                  resetForm();
+                }}
                 className="text-gray-400 hover:text-gray-600 text-xl font-bold p-1"
               >
                 ✕
@@ -589,7 +689,11 @@ export default function Event() {
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setEditingEventId(null);
+                    resetForm();
+                  }}
                   className="px-4 py-2 border border-gray-200 text-slate-950 rounded-lg text-sm font-medium hover:bg-gray-50"
                 >
                   Cancel
@@ -599,7 +703,7 @@ export default function Event() {
                   disabled={isSubmitting}
                   className="px-4 py-2 bg-cyan-500 text-white rounded-lg text-sm font-medium hover:bg-cyan-500 transition disabled:opacity-50 cursor-pointer"
                 >
-                  {isSubmitting ? 'Publishing...' : 'Publish Event'}
+                  {isSubmitting ? (editingEventId ? 'Updating...' : 'Publishing...') : (editingEventId ? 'Update Event' : 'Publish Event')}
                 </button>
               </div>
             </form>
@@ -766,6 +870,18 @@ export default function Event() {
                           >
                             Details
                           </Link>
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(event)}
+                            aria-label={`Edit ${event.name}`}
+                            title={`Edit ${event.name}`}
+                            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-500/30 transition duration-200 hover:scale-105 hover:bg-amber-600 hover:shadow-xl hover:shadow-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                              <path d="M12 20h9" />
+                              <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                            </svg>
+                          </button>
                           <Link
                             to={`/register/${event.uid}`}
                             className="flex-1 rounded-full bg-cyan-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-cyan-500"
