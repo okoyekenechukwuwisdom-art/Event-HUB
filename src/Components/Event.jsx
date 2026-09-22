@@ -817,7 +817,7 @@ export default function Event() {
                       </Link>
                       <Link
                         to={`/register/${featuredEvent.uid}`}
-                        className="flex-1 rounded-full bg-cyan-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-cyan-500"
+                        className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${dark ? 'bg-cyan-500 text-white hover:bg-cyan-400' : 'bg-cyan-600 text-white hover:bg-cyan-500'}`}
                       >
                         Register
                       </Link>
@@ -930,7 +930,7 @@ export default function Event() {
                           </button>
                           <Link
                             to={`/register/${event.uid}`}
-                            className="flex-1 rounded-full bg-cyan-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-cyan-500"
+                            className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${dark ? 'bg-cyan-500 text-white hover:bg-cyan-400' : 'bg-cyan-600 text-white hover:bg-cyan-500'}`}
                           >
                             Register
                           </Link>

@@ -56,7 +56,7 @@ export default function NavBar() {
             </div>
           </div>
 
-          <div className="hidden items-center gap-2 rounded-full border border-slate-200/80 bg-slate-50/80 p-1.5 md:flex dark:border-slate-700 dark:bg-slate-900/80">
+          <div className={`hidden items-center gap-2 rounded-full border   p-1.5 md:flex ${dark? 'border-gray-200' : 'border-slate-700'}  `}>
             {navItems.map((item) => (
               <NavLink key={item.to} to={item.to} className={navLinkClass}>
                 {item.label}
@@ -129,7 +129,7 @@ export default function NavBar() {
 
             <div className="flex items-center gap-3 pt-2">
               <NavLink
-                to="/registration"
+                to='/register/'
                 onClick={() => setIsMenuOpen(false)}
                 className={`flex-1 rounded-full px-4 py-2.5 text-center text-sm font-semibold ${dark ? 'bg-cyan-500 text-white' : 'bg-cyan-400 text-slate-950'}`}
               >
