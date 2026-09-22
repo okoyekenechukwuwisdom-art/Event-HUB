@@ -77,7 +77,7 @@ export default function NavBar() {
               className={`rounded-full p-2.5 text-sm font-medium transition ${dark ? 'bg-slate-200 text-slate-900 hover:bg-slate-300' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
               aria-label="Toggle color mode"
             >
-              {dark ? 'Dark' : 'Light'}
+              {dark ? 'Light' : 'Dark'}
             </button>
           </div>
 
