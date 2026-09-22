@@ -109,6 +109,23 @@ export default function Event() {
   
   const API_URL = 'https://event-hub-olive-six.vercel.app/api/v1/events/';
 
+  const deleteEventById = async (eventId) => {
+    if (!eventId) {
+      throw new Error('Event ID is required to delete the event.');
+    }
+
+    const response = await fetch(`${API_URL}${eventId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail ? JSON.stringify(errorData.detail) : 'Failed to delete event');
+    }
+
+    return true;
+  };
+
   const updateEventById = async (eventId, updates = {}, files = []) => {
     if (!eventId) {
       throw new Error('Event ID is required to update the event.');
@@ -326,6 +343,20 @@ export default function Event() {
       status: event.status || 'upcoming',
     });
     setIsModalOpen(true);
+  };
+
+  const handleDeleteEvent = async (event) => {
+    if (!event?.uid) return;
+
+    const confirmed = window.confirm(`Delete "${event.name || 'this event'}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      await deleteEventById(event.uid);
+      setEvents((prevEvents) => prevEvents.filter((item) => item.uid !== event.uid));
+    } catch (err) {
+      alert(`Error deleting event: ${err.message}`);
+    }
   };
 
   const categories = useMemo(
@@ -880,6 +911,21 @@ export default function Event() {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
                               <path d="M12 20h9" />
                               <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEvent(event)}
+                            aria-label={`Delete ${event.name}`}
+                            title={`Delete ${event.name}`}
+                            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-red-500 bg-red-500 text-white shadow-lg shadow-red-500/25 transition duration-200 hover:scale-105 hover:bg-red-600 hover:shadow-xl hover:shadow-red-500/35 focus:outline-none focus:ring-2 focus:ring-red-300"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                              <path d="M3 6h18" />
+                              <path d="M8 6V4h8v2" />
+                              <path d="M19 6l-1 14H6L5 6" />
+                              <path d="M10 11v6" />
+                              <path d="M14 11v6" />
                             </svg>
                           </button>
                           <Link
