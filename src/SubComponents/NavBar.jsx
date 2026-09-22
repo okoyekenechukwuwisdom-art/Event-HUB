@@ -138,7 +138,7 @@ export default function NavBar() {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className={`rounded-full px-4 py-2.5 text-sm font-medium ${dark ? 'bg-slate-200 text-slate-900' : 'bg-slate-800 text-white'}`}
+                className={`rounded-full px-4 py-2.5 text-sm font-medium  ${dark ? 'bg-slate-200 text-slate-900' : 'bg-slate-800 text-white'}`}
               >
                 {dark ? 'Light' : 'Dark'}
               </button>

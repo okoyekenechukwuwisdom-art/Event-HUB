@@ -80,7 +80,7 @@ export default function EventDetails() {
 
   if (loading) {
     return (
-      <main className={`${dark ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-900'} min-h-screen px-4 py-12`}>
+      <main className={`${dark ? 'bg-slate-100 text-slate-900' : 'bg-slate-950 text-white'} min-h-screen px-4 py-12`}>
         <div className="mx-auto max-w-5xl animate-pulse rounded-[32] bg-slate-300/10 p-6">
           <div className="h-80 rounded-3xl bg-slate-300/20" />
           <div className="mt-6 h-6 w-32 rounded-full bg-slate-300/20" />
@@ -154,16 +154,16 @@ export default function EventDetails() {
               </div>
 
               <div className="mt-8 space-y-4 text-sm">
-                <div className="flex items-center justify-between rounded-2xl bg-slate-100 px-4 py-3 dark:bg-slate-800">
-                  <span className="text-slate-500 dark:text-slate-300">Date</span>
+                <div className={`flex items-center justify-between rounded-2xl  px-4 py-3 ${dark ? 'bg-slate-100' : 'bg-slate-800'} `}>
+                  <span className={`${dark? 'text-slate-900' : ''}`}>Date</span>
                   <span className="font-semibold">{formatDate(event.date)}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-2xl bg-slate-100 px-4 py-3 dark:bg-slate-800">
-                  <span className="text-slate-500 dark:text-slate-300">Time</span>
+                <div className={`flex items-center justify-between rounded-2xl  px-4 py-3 ${dark? 'bg-slate-100' : 'bg-slate-800'}`}>
+                  <span className={`${dark? 'text-slate-900' : ''}`}>Time</span>
                   <span className="font-semibold">{event.event_time || 'To be announced'}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-2xl bg-slate-100 px-4 py-3 dark:bg-slate-800">
-                  <span className="text-slate-500 dark:text-slate-300">Location</span>
+                <div className={`flex items-center justify-between rounded-2xl  px-4 py-3 ${dark? 'bg-slate-100' : 'bg-slate-800'}`} >
+                  <span className={`${dark? 'text-slate-900' : ''}`}>Location</span>
                   <span className="font-semibold">{event.location || 'TBA'}</span>
                 </div>
               </div>
