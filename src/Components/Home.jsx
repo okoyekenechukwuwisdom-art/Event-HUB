@@ -1,13 +1,47 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useTheme } from '../content/ThemeContext.jsx';
 import { NavLink } from 'react-router-dom';
 import eventimg from '../assets/eventimg1.avif';
 
-
-
-
-
 export default function Home() {
   const { dark } = useTheme();
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHomeEvents = async () => {
+      try {
+        const response = await fetch('https://event-hub-olive-six.vercel.app/api/v1/events/');
+
+        if (!response.ok) {
+          throw new Error('Failed to load events');
+        }
+
+        const data = await response.json();
+        setEvents(Array.isArray(data) ? data : []);
+      } catch {
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeEvents();
+  }, []);
+
+  const upcomingEvents = useMemo(() => {
+    const now = new Date();
+
+    return [...events]
+      .filter((event) => {
+        if (!event?.date) return true;
+        return new Date(event.date) >= now;
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(0, 3);
+  }, [events]);
+
+  const totalUpcoming = upcomingEvents.length;
 
   return (
     <section
@@ -50,26 +84,32 @@ export default function Home() {
                 ACTIVE
               </div>
               <div className="mt-3 flex items-center gap-4">
-                <span className="text-4xl font-bold text-slate-900">6</span>
+                <span className="text-4xl font-bold text-slate-900">{loading ? '...' : totalUpcoming}</span>
                 <span className="rounded-full bg-cyan-100 px-3 py-1 text-sm font-medium text-cyan-700">
-                  This week
+                  Upcoming
                 </span>
               </div>
             </div>
 
-            <div className="mt-5 rounded-2xl  p-4 text-slate-900">
+            <div className="mt-5 rounded-2xl p-4 text-slate-900">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-800">
                 Upcoming
               </p>
               <div className="mt-4 space-y-3">
-                <div className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2">
-                  <span className="font-medium">Tech Meetup</span>
-                  <span className="text-sm text-slate-600">Thu</span>
-                </div>
-                <div className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2">
-                  <span className="font-medium">Creative Workshop</span>
-                  <span className="text-sm text-slate-600">Fri</span>
-                </div>
+                {upcomingEvents.length ? (
+                  upcomingEvents.map((event) => (
+                    <div key={event.uid} className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2">
+                      <span className="font-medium">{event.name}</span>
+                      <span className="text-sm text-slate-600">
+                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl bg-white/60 px-3 py-2 text-sm text-slate-600">
+                    No upcoming events right now.
+                  </div>
+                )}
               </div>
             </div>
           </div>

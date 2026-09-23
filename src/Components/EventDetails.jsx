@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTheme } from '../content/ThemeContext.jsx';
+import { isFavoriteEvent, readFavoriteIds, toggleFavoriteEvent } from '../content/favoritesStorage.jsx';
 import eventimg1 from '../assets/eventimg1.avif';
 import eventimg2 from '../assets/eventimg2.avif';
 import eventimg3 from '../assets/eventimg3.avif';
@@ -41,6 +42,11 @@ export default function EventDetails() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [favoriteIds, setFavoriteIds] = useState([]);
+
+  useEffect(() => {
+    setFavoriteIds(readFavoriteIds());
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -114,6 +120,11 @@ export default function EventDetails() {
       : fallbackImages[event.category] ?? fallbackImages.Default;
 
   const seatsLeft = Math.max((event.capacity ?? 0) - (event.registered ?? 0), 0);
+  const isFavorite = favoriteIds.includes(String(event.uid));
+
+  const handleFavoriteToggle = () => {
+    setFavoriteIds(toggleFavoriteEvent(event.uid));
+  };
 
   return (
     <main className={`${dark ? 'bg-slate-100 text-slate-900' : 'bg-slate-950 text-white'} min-h-screen px-4 py-8 sm:px-6 lg:px-8`}>
@@ -173,12 +184,24 @@ export default function EventDetails() {
                   <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Ticket</p>
                   <p className="mt-2 text-3xl font-black text-cyan-600">${Number(event.price ?? 0).toLocaleString()}</p>
                 </div>
-                <Link
-                  to={`/register/${event.uid}`}
-                  className="rounded-full bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500"
-                >
-                  Register now
-                </Link>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleFavoriteToggle}
+                    aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${isFavorite ? 'border-pink-500 bg-pink-500 text-white shadow-lg shadow-pink-500/30' : 'border-pink-200 bg-pink-50 text-pink-500 hover:bg-pink-100'}`}
+                  >
+                    <svg viewBox="0 0 24 24" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+                      <path d="M12 21s-8.5-5.4-10-9.8C1.2 8.5 3.2 4 7.5 4c2 0 3.3 1 4.5 2.3C13.2 5 14.5 4 16.5 4 20.8 4 22.8 8.5 22 11.2 20.5 15.6 12 21 12 21Z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <Link
+                    to={`/register/${event.uid}`}
+                    className="rounded-full bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500"
+                  >
+                    Register now
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

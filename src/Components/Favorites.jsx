@@ -1,33 +1,39 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../content/ThemeContext.jsx';
+import { readFavoriteIds, toggleFavoriteEvent } from '../content/favoritesStorage.jsx';
+import eventimg1 from '../assets/eventimg1.avif';
+import eventimg2 from '../assets/eventimg2.avif';
+import commuimg from '../assets/commuimg.avif';
+import businessimg from '../assets/businessimg.avif';
+import musicimg from '../assets/musicimg.avif';
+import techimg2 from '../assets/techimg2.avif';
+import workshopimg from '../assets/workshopimg.avif';
 
-const FAVORITES_KEY = 'eventhub-favorites';
+const API_URL = 'https://event-hub-olive-six.vercel.app/api/v1/events/';
 
-const sampleFavorites = [
-  {
-    uid: 'sample-1',
-    name: 'Tech Summit 2026',
-    category: 'Technology',
-    date: '2026-10-12',
-    location: 'Lagos',
-    event_time: '09:00',
-    price: 250,
-    organizer: 'EventHub Studio',
-    status: 'upcoming',
-  },
-  {
-    uid: 'sample-2',
-    name: 'City Music Night',
-    category: 'Music',
-    date: '2026-10-18',
-    location: 'Abuja',
-    event_time: '19:30',
-    price: 180,
-    organizer: 'Pulse Live',
-    status: 'upcoming',
-  },
-];
+const fallbackImages = {
+  Technology: techimg2,
+  Music: musicimg,
+  Workshop: workshopimg,
+  Business: businessimg,
+  Community: commuimg,
+  Other: eventimg2,
+  Default: eventimg1,
+};
+
+const resolveImage = (event) => {
+  const rawImage = Array.isArray(event?.images)
+    ? event.images[0]
+    : event?.image ?? event?.images;
+
+  if (typeof rawImage === 'string' && rawImage.trim() && rawImage !== 'string') {
+    if (rawImage.startsWith('http')) return rawImage;
+    return `https://event-hub-olive-six.vercel.app${rawImage.startsWith('/') ? rawImage : `/${rawImage}`}`;
+  }
+
+  return fallbackImages[event?.category] ?? fallbackImages.Default;
+};
 
 const formatDate = (value) => {
   if (!value) return 'Date to be announced';
@@ -46,27 +52,45 @@ const formatDate = (value) => {
 export default function Favorites() {
   const { dark } = useTheme();
   const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem(FAVORITES_KEY);
+    const savedFavoriteIds = readFavoriteIds();
 
-    if (!saved) {
+    if (!savedFavoriteIds.length) {
       setFavorites([]);
+      setLoading(false);
       return;
     }
 
-    try {
-      const parsed = JSON.parse(saved);
-      setFavorites(Array.isArray(parsed) ? parsed : []);
-    } catch {
-      setFavorites([]);
-    }
+    const fetchFavoriteEvents = async () => {
+      try {
+        setLoading(true);
+        const responses = await Promise.all(
+          savedFavoriteIds.map(async (id) => {
+            const response = await fetch(`${API_URL}${id}`);
+            if (!response.ok) {
+              return null;
+            }
+
+            return response.json();
+          }),
+        );
+
+        setFavorites(responses.filter(Boolean));
+      } catch {
+        setFavorites([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFavoriteEvents();
   }, []);
 
   const removeFavorite = (uid) => {
-    const nextFavorites = favorites.filter((event) => event.uid !== uid);
-    setFavorites(nextFavorites);
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(nextFavorites));
+    toggleFavoriteEvent(uid);
+    setFavorites((prevFavorites) => prevFavorites.filter((event) => String(event.uid) !== String(uid)));
   };
 
   const hasFavorites = favorites.length > 0;
@@ -87,14 +111,18 @@ export default function Favorites() {
           </div>
         </div>
 
-        {!hasFavorites ? (
+        {loading ? (
+          <div className={`mt-8 rounded-[30px] border p-10 text-center shadow-sm ${dark ? 'border-slate-300 bg-white' : 'border-slate-700 bg-slate-900'}`}>
+            <p className="text-lg font-semibold">Loading favorites...</p>
+          </div>
+        ) : !hasFavorites ? (
           <div className={`mt-8 rounded-[30px] border border-dashed p-10 text-center shadow-sm ${dark ? 'border-slate-300 bg-white' : 'border-slate-700 bg-slate-900/70'}`}>
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-500">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-8 w-8">
                 <path d="M12 21s-8.5-5.4-10-9.8C1.2 8.5 3.2 4 7.5 4c2 0 3.3 1 4.5 2.3C13.2 5 14.5 4 16.5 4 20.8 4 22.8 8.5 22 11.2 20.5 15.6 12 21 12 21Z" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h2 className="mt-5 text-2xl font-black">No favorites yet</h2>
+            <h2 className="mt-5 text-2xl font-black">No favorite events yet!</h2>
             <p className={`mx-auto mt-3 max-w-xl text-sm ${dark ? 'text-slate-300' : 'text-slate-600'}`}>
               Save the events you like and they’ll appear here so you can revisit them anytime.
             </p>
@@ -110,15 +138,15 @@ export default function Favorites() {
             {favorites.map((event) => (
               <article
                 key={event.uid}
-                className={`overflow-hidden rounded-[28px] border shadow-sm ${dark ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'}`}
+                className={`overflow-hidden rounded-[28px] border shadow-sm ${dark ? 'border-slate-200 bg-white' : 'border-slate-700 bg-slate-900'}`}
               >
                 <div className="relative h-44 overflow-hidden">
                   <img
-                    src={event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80'}
+                    src={resolveImage(event)}
                     alt={event.name}
                     className="h-full w-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80';
+                      e.currentTarget.src = fallbackImages[event.category] ?? fallbackImages.Default;
                     }}
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-900/20 to-transparent" />

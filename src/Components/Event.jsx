@@ -1,6 +1,7 @@
-import { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../content/ThemeContext.jsx';
+import { isFavoriteEvent, readFavoriteIds, toggleFavoriteEvent } from '../content/favoritesStorage.jsx';
 import eventimg1 from '../assets/eventimg1.avif';
 import eventimg2 from '../assets/eventimg2.avif';
 import commuimg from '../assets/commuimg.avif';
@@ -89,6 +90,9 @@ export default function Event() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEventId, setEditingEventId] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [favoriteIds, setFavoriteIds] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
 
   const [isSubmitting,setIsSubmitting] = useState(false);
   const [formData,setFormData] = useState({
@@ -100,9 +104,9 @@ export default function Event() {
     organizer: '',
     event_time: '18:00',
     files: [],
-    capacity: 100,
-    registered: 0,
-    price: 0,
+    capacity: '',
+    registered: '',
+    price: '',
     status: 'upcoming',
   });
 
@@ -182,7 +186,18 @@ export default function Event() {
 
   useEffect(() => {
     getEvents();
+    setFavoriteIds(readFavoriteIds());
   },[]);
+
+  const handleFavoriteToggle = (event) => {
+    const eventId = event?.uid ?? event?.id;
+
+    if (!eventId) {
+      return;
+    }
+
+    setFavoriteIds(toggleFavoriteEvent(eventId));
+  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -193,7 +208,10 @@ export default function Event() {
     }
 
     if (['capacity', 'registered', 'price'].includes(name)) {
-      setFormData((prev) => ({ ...prev, [name]: Number(value) || 0 }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value === '' ? '' : Number(value),
+      }));
       return;
     }
 
@@ -210,12 +228,55 @@ export default function Event() {
       organizer: '',
       event_time: '18:00',
       files: [],
-      capacity: 100,
-      registered: 0,
-      price: 0,
+      capacity: '',
+      registered: '',
+      price: '',
       status: 'upcoming',
     });
+    setExistingImages([]);
   };
+
+  const normalizeDateForInput = (value) => {
+    if (!value) return '';
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return '';
+      const isoDate = trimmed.includes('T') ? trimmed.split('T')[0] : trimmed;
+      return isoDate.length >= 10 ? isoDate.slice(0, 10) : isoDate;
+    }
+
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().slice(0, 10);
+    }
+
+    return String(value).slice(0, 10);
+  };
+
+  const successTimerRef = useRef(null);
+
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+    }
+
+    successTimerRef.current = setTimeout(() => {
+      setSuccessMessage('');
+      setIsModalOpen(false);
+      setEditingEventId(null);
+      resetForm();
+    }, 1800);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -310,7 +371,7 @@ export default function Event() {
       await getEvents();
       resetForm();
       setEditingEventId(null);
-      setIsModalOpen(false);
+      showSuccessMessage(editingEventId ? 'Event updated successfully!' : 'Event created successfully!');
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
@@ -319,16 +380,24 @@ export default function Event() {
   };
 
   const openCreateModal = () => {
+    setSuccessMessage('');
     resetForm();
     setEditingEventId(null);
     setIsModalOpen(true);
   };
 
   const openEditModal = (event) => {
+    const imageList = Array.isArray(event?.images)
+      ? event.images
+      : event?.image
+        ? [event.image]
+        : [];
+
     setEditingEventId(event.uid);
+    setExistingImages(imageList);
     setFormData({
       name: event.name || '',
-      date: event.date || '',
+      date: normalizeDateForInput(event.date),
       category: event.category || 'Technology',
       location: event.location || '',
       description: event.description || '',
@@ -541,6 +610,10 @@ export default function Event() {
               <h2 className="text-xl font-bold text-gray-900">{editingEventId ? 'Edit Event' : 'Create New Event'}</h2>
               <button 
                 onClick={() => {
+                  if (successTimerRef.current) {
+                    clearTimeout(successTimerRef.current);
+                  }
+                  setSuccessMessage('');
                   setIsModalOpen(false);
                   setEditingEventId(null);
                   resetForm();
@@ -550,6 +623,22 @@ export default function Event() {
                 ✕
               </button>
             </div>
+
+            {successMessage && (
+              <div className="mb-4 overflow-hidden rounded-2xl border border-emerald-300/70 bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500 shadow-[0_18px_45px_rgba(16,185,129,0.32)]">
+                <div className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-white">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-white/15 shadow-inner shadow-white/20 backdrop-blur-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4">
+                      <path d="M5 12.5l4.2 4.2L19 2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-50/90">Success</div>
+                    <div className="mt-0.5">{successMessage}</div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -630,7 +719,7 @@ export default function Event() {
                   name="registered"
                   value={formData.registered}
                   onChange={handleChange}
-                  placeholder="3429"
+                  placeholder="0"
                   className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
               </div>
@@ -660,6 +749,26 @@ export default function Event() {
                   onChange={handleChange}
                   className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                 />
+
+                {existingImages.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">Current image</p>
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {existingImages.map((image, index) => (
+                        <img
+                          key={`${image}-${index}`}
+                          src={resolveImage({ images: [image], category: formData.category })}
+                          alt={`Current event preview ${index + 1}`}
+                          className="h-16 w-16 rounded-lg object-cover border border-slate-200"
+                          onError={(e) => {
+                            e.currentTarget.src = fallbackImages[formData.category] ?? fallbackImages.Default;
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {formData.files.length > 0 && (
                   <p className="mt-2 text-xs text-slate-500">
                     {formData.files.length} file(s) selected
@@ -687,7 +796,7 @@ export default function Event() {
                     name="price"
                     value={formData.price}
                     onChange={handleChange}
-                    placeholder="1200"
+                    placeholder="0"
                     className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
@@ -699,7 +808,7 @@ export default function Event() {
                     name="capacity"
                     value={formData.capacity}
                     onChange={handleChange}
-                    placeholder="5000"
+                    placeholder="0"
                     className="text-gray-400 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
                   />
                 </div>
@@ -809,6 +918,16 @@ export default function Event() {
                     </div>
 
                     <div className="mt-6 flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleFavoriteToggle(featuredEvent)}
+                        aria-label={isFavoriteEvent(featuredEvent.uid) ? 'Remove from favorites' : 'Add to favorites'}
+                        className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${favoriteIds.includes(String(featuredEvent.uid)) ? 'border-pink-500 bg-pink-500 text-white shadow-lg shadow-pink-500/30' : 'border-pink-200 bg-pink-50 text-pink-500 hover:bg-pink-100'}`}
+                      >
+                        <svg viewBox="0 0 24 24" fill={favoriteIds.includes(String(featuredEvent.uid)) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+                          <path d="M12 21s-8.5-5.4-10-9.8C1.2 8.5 3.2 4 7.5 4c2 0 3.3 1 4.5 2.3C13.2 5 14.5 4 16.5 4 20.8 4 22.8 8.5 22 11.2 20.5 15.6 12 21 12 21Z" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
                       <Link
                         to={`/event/${featuredEvent.uid}`}
                         className="flex-1 rounded-full border border-cyan-600 px-4 py-2.5 text-center text-sm font-semibold text-cyan-600 transition hover:bg-cyan-600 hover:text-white"
@@ -895,6 +1014,17 @@ export default function Event() {
                         </div>
 
                         <div className="flex gap-3 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => handleFavoriteToggle(event)}
+                            aria-label={favoriteIds.includes(String(event.uid)) ? 'Remove from favorites' : 'Add to favorites'}
+                            title={favoriteIds.includes(String(event.uid)) ? 'Remove from favorites' : 'Add to favorites'}
+                            className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${favoriteIds.includes(String(event.uid)) ? 'border-pink-500 bg-pink-500 text-white shadow-lg shadow-pink-500/30' : 'border-pink-200 bg-pink-50 text-pink-500 hover:bg-pink-100'}`}
+                          >
+                            <svg viewBox="0 0 24 24" fill={favoriteIds.includes(String(event.uid)) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+                              <path d="M12 21s-8.5-5.4-10-9.8C1.2 8.5 3.2 4 7.5 4c2 0 3.3 1 4.5 2.3C13.2 5 14.5 4 16.5 4 20.8 4 22.8 8.5 22 11.2 20.5 15.6 12 21 12 21Z" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </button>
                           <Link
                             to={`/event/${event.uid}`}
                             className="flex-1 rounded-full border border-cyan-600 px-4 py-2.5 text-center text-sm font-semibold text-cyan-600 transition hover:bg-cyan-600 hover:text-white"
